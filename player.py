@@ -9,6 +9,10 @@ class Config:
     path = ""
 
 class Player:
+    soundListDict = None
+    config = None
+    soundListJson = None
+
     def __init__(self):
         self.refreshSoundList()
 
@@ -35,26 +39,34 @@ class Player:
 
     # Loads the list of sounds
     def loadSoundList(self, path):
-        soundList = [f for f in listdir(path) if (isfile(join(path, f)) and (f.endswith(".mp4") or f.endswith(".wav")))]
-        print(soundList)
-        soundListJson = {"sounds" : []}
+        self.soundListDict = [f for f in listdir(path) if (isfile(join(path, f)) and (f.endswith(".mp4") or f.endswith(".wav")))]
+        print(self.soundListDict)
+        self.soundListJson = {"sounds" : []}
 
-        for soundName in soundList:
+        for soundName in self.soundListDict:
             soundStruct = {
                 "Filename": soundName
             }
             print(json.dumps(soundStruct))
-            soundListJson["sounds"].append(soundStruct)
+            self.soundListJson["sounds"].append(soundStruct)
 
-        print(json.dumps(soundListJson))
+        print(json.dumps(self.soundListJson))
 
         with open("./config/soundsList.txt", "w+") as writeFile:
-            json.dump(soundListJson, writeFile)
+            json.dump(self.soundListJson, writeFile)
 
-    def play(self, path, file):
-        playsound(join(path,file))
+    def play(self, file):
+        playsound(join(self.config.path,file))
+
+    def playAll(self):
+        for sound in self.soundList:
+            self.play(sound)
 
     # Refreshs the list of Sounds
     def refreshSoundList(self):
-        config = self.loadConfigFile()
-        self.loadSoundList(config.path)
+        self.config = self.loadConfigFile()
+        self.loadSoundList(self.config.path)
+
+    # Returns the list of Sounds
+    def soundList(self):
+        return self.soundListJson
